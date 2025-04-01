@@ -9,7 +9,7 @@
                 :activateSubmitButton="animation_finished"
                 :communityColor="communityColor"
                 @export-network="exportNetwork"  
-                @updatevisualizationParameters="updatevisualizationParameters"
+                @updateVisualizationParameters="updateVisualizationParameters"
                 @changeCommunityColor="changeCommunityColor"
                 @updateEdgesColor="updateEdgesColor">
             </PlotNetworkForm>
@@ -48,6 +48,8 @@ export default {
             this.$refs.plotNetworkForm.submit_experiment_with_confirmation();
         },
         updateVisualizationParameters(newNetworkParams){
+            console.log("VisualizationExperiment")
+            console.log(newNetworkParams)
             this.visualizationParameters = newNetworkParams
         },
         setSelectedColor(selectedColor){

@@ -44,6 +44,7 @@
         for (let key in vizParams) {
           vizParams[key] = parseFloat(vizParams[key]);
         }
+        this.$store.commit('experiment/setVisualizationParams', vizParams)
         this.$emit('updateVisualizationParameters', vizParams)
       }
     }

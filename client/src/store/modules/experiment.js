@@ -23,7 +23,7 @@ export default {
       }),
 
       getters:{
-        getExperiment: (state) => {return cloneDeep(state.experiment)},
+        getExperiment: (state) => {return state.experiment},
 
         network: (state) => cloneDeep(state.experiment.network_json),
 

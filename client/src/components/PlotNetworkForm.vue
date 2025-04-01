@@ -113,7 +113,6 @@ export default {
     updateVisualizationParameters(newvisualizationParameters){
         this.visualizationParameters = newvisualizationParameters
         this.experiment.visualization_params = newvisualizationParameters
-        this.$store.commit('experiment/setVisualizationParams', newvisualizationParameters)
         this.$emit('updateVisualizationParameters', newvisualizationParameters)
     },
     async handleSubmitNetwork(){
@@ -151,11 +150,11 @@ export default {
     },
 
     async submit_experiment_to_backend() {
-      this.experiment = this.$store.getters['experiment/getExperiment'] 
-      console.log(this.$store.getters['experiment/getExperiment'])
+      this.experiment = this.$store.getters['experiment/getExperiment']
       await this.$store.dispatch('experiment/saveExperiment')      
       this.experiment = this.$store.getters['experiment/getExperiment']
-      console.log(this.experiment)
+      // console.log("Saving experiment:")
+      // console.log(this.experiment)
       this.submitted_msg = "Guardado!"
       this.showSuccessAlert()
     }, 

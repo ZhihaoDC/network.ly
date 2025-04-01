@@ -48,8 +48,6 @@ export default {
             this.$refs.plotNetworkForm.submit_experiment_with_confirmation();
         },
         updateVisualizationParameters(newNetworkParams){
-            console.log("VisualizationExperiment")
-            console.log(newNetworkParams)
             this.visualizationParameters = newNetworkParams
         },
         setSelectedColor(selectedColor){

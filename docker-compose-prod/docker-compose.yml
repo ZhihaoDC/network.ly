@@ -1,0 +1,67 @@
+version: "3"
+services:
+
+  # MySQL
+  mysql_db:
+    image: mysql
+    container_name: mysql_db
+    restart: always
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: Networkly
+        MYSQL_USER: user
+        MYSQL_PASSWORD: pwd12345
+        MYSQL_HOST: mysql_db
+        MYSQL_PORT: 3306
+    volumes: 
+        - mysql_data:/var/lib/mysql
+    ports: 
+        - 3306:3306
+    command:
+        - --sort_buffer_size=262144000 #250MB
+
+  # MySQL adminer
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    ports:
+        - 8543:8080
+
+
+  # Backend
+  backend:
+    image: crazyhao/networkly-server
+    container_name: networkly-server
+    depends_on:
+      - mysql_db
+      - adminer
+    
+    ports:  
+      - 8181:5000
+    environment:
+      MYSQL_DATABASE: "Networkly"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "pwd12345"
+      MYSQL_HOST: mysql_db
+      MYSQL_PORT: 3306
+      FLASK_ENV: development
+      WAIT_HOSTS: mysql_db:3306,adminer:8543
+      WAIT_HOSTS_TIMEOUT: 300
+      WAIT_SLEEP_INTERVAL: 30
+      WAIT_HOST_CONNECT_TIMEOUT: 30
+
+
+  # Frontend
+  frontend:
+    image: crazyhao/networkly-client
+    container_name: networkly-client
+
+    ports:
+      - 8080:8080 
+    environment: 
+      - CHOKIDAR_USEPOLLING=true
+
+
+volumes:
+  mysql_data:

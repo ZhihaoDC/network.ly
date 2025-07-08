@@ -1,0 +1,19 @@
+//Font
+$enable-responsive-font-sizes: "true";
+
+//Buttons
+$btn-padding-y-lg: 0.7em;
+$btn-padding-x-lg: 1em;  
+
+$btn-border-radius-lg: 10px;
+$btn-border-radius: 10px;
+
+$btn-border: 1px solid #ccc;
+$btn-border-lg: 1px solid #ccc;
+
+//Cards
+$card-border-radius: 10px;
+// Bootstrap and its default variables
+@import '../../../node_modules/bootstrap/scss/bootstrap';
+// BootstrapVue and its default variables
+@import '../../../node_modules/bootstrap-vue/src/index.scss';

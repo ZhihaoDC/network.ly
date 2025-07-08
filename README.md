@@ -1,24 +1,25 @@
-# communify
 
-## Project setup
-```
-npm install
-```
+![build](https://github.com/ZhihaoDC/network.ly/actions/workflows/test-backend.yml/badge.svg)
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+# network.ly
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Clone this repository to your local machine
 
-### Lints and fixes files
+## Ensure you have docker desktop installed in your machine
+
+## In the root folder of your cloned project, i.e
 ```
-npm run lint
+networkly/ <-----------
+    client/
+    server/
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Open Terminal and build the app
+```
+docker compose up --force-recreate
+```
+
+### To terminate all containers and volumes
+```
+docker compose down -v
+```

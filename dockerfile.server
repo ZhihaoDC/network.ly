@@ -1,0 +1,22 @@
+FROM python:3.11
+
+#Set working directory
+WORKDIR /app
+
+#install dependencies
+COPY server/requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+#Copy all to container
+COPY server /app/server
+
+#setup project
+WORKDIR /app/server
+ENV FLASK_APP=src
+
+RUN pip freeze
+#listen on port 5000
+EXPOSE 5000
+
+#run server
+CMD ["flask", "run", "--host=0.0.0.0", "--debugger"]

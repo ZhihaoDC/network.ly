@@ -3,14 +3,14 @@ import json
 from pandas import read_csv
 from csv import writer, QUOTE_NONNUMERIC
 import networkx
-import src.api.preprocess as preprocess
+import src.api.__network_formatter__ as preprocess
 
 
 def test_preprocess_network(csv_file):
     """
     GIVEN a .csv file from the body of a http POST request
-    WHEN function preprocess_network is called
-    THEN function preprocess_network returns formatted networkx.Graph Object
+    WHEN function file_to_network is called
+    THEN function file_to_network returns formatted networkx.Graph Object
     """
 
     result = preprocess.file_to_network(csv_file)
@@ -18,14 +18,11 @@ def test_preprocess_network(csv_file):
     assert isinstance(result, networkx.Graph)
     assert not networkx.classes.function.is_empty(result)
 
-    #assert that node labels are integers 
-    assert all([isinstance(i, int) for i in result.nodes()])
-
-    #assert that label is a node attribute (storing old name)
-    assert all(['name' in result.nodes(data=True)[i] for i in range(result.number_of_nodes())]) 
+    #assert that node labels are strings 
+    assert all([isinstance(i, str) for i in result.nodes()])
 
     #assert that weight is an edge attribute
-    assert all(['weight' in data for u, v, data  in result.edges(data=True)])
+    assert all(['weight' in data for u, v, data in result.edges(data=True)])
 
 
 
@@ -38,7 +35,7 @@ def test_preprocess_json(csv_file):
     """
     graph = preprocess.file_to_network(csv_file)
 
-    communities = {0:1, 1:1, 2:2, 3:1, 4:3} #mock communities
+    communities = {'node_1':1, 'node_2':1, 'node_3':2, 'node_4':1, 'node_5':3} #mock communities
 
     result = preprocess.network_to_json(graph, communities)
 

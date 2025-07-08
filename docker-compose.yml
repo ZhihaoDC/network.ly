@@ -5,7 +5,6 @@ services:
   mysql_db:
     image: mysql
     container_name: mysql_db
-    restart: always
     environment:
         MYSQL_ROOT_PASSWORD: root
         MYSQL_DATABASE: Networkly
@@ -31,14 +30,19 @@ services:
 
   # Backend
   backend:
-    image: crazyhao/networkly-server
     container_name: networkly-backend
+    build: 
+      context : "./"
+      dockerfile: "dockerfile.server"
     depends_on:
       - mysql_db
       - adminer
+    #enable live reload on development
+    volumes:
+      - ./server:/app/server:cached
     
     ports:  
-      - 5000:5000
+      - 8181:5000
     environment:
       MYSQL_DATABASE: "Networkly"
       MYSQL_USER: "user"
@@ -54,8 +58,15 @@ services:
 
   # Frontend
   frontend:
-    image: crazyhao/networkly-client
     container_name: networkly-frontend
+    build: 
+      context : "./"
+      dockerfile: "dockerfile.client"
+    
+    #enable live reload on development    
+    volumes:
+      - ./client:/app/client:cached
+      - /app/client/node_modules
 
     ports:
       - 8080:8080 

@@ -1,11 +1,11 @@
 from itsdangerous import NoneAlgorithm
 from pandas import DataFrame, Series, read_csv, isna
 from json import loads
-from networkx import from_pandas_edgelist, get_node_attributes
+from networkx import Graph, from_pandas_edgelist, get_node_attributes
 from networkx.relabel import convert_node_labels_to_integers
 from networkx.classes.function import set_node_attributes, set_edge_attributes
-from networkx.readwrite.json_graph import cytoscape_data
-from matplotlib.cm import get_cmap
+from networkx.readwrite.json_graph import cytoscape_data, cytoscape_graph
+from matplotlib.pyplot import get_cmap
 from matplotlib.colors import rgb2hex
 
 
@@ -51,7 +51,7 @@ def file_to_network(file, input_columns=None):
                                 target=target,
                                 edge_attr=weights)
 
-    graph = convert_node_labels_to_integers(graph, first_label=0, label_attribute='name')
+    # graph = convert_node_labels_to_integers(graph, first_label=0, label_attribute='name')
 
     return graph
 
@@ -97,12 +97,12 @@ def network_to_json(graph, communities=None):
     for u,v in graph.edges:
         graph[u][v]['id'] = str(u)+'-'+str(v)
 
-    graph_json = dict(cytoscape_data(graph, name="name", ident="id"))
+    graph_json = dict(cytoscape_data(graph, ident="name", name=None))
     
     return graph_json
 
 
-#Helper method
+
 def get_community_colors(graph, community):
 	""" 
 	Draws the graph using colors as community identifier
@@ -126,3 +126,32 @@ def remap_communities(communities):
     comms_sort = Series(communities.values()).value_counts()
     reorder_map = dict(zip(comms_sort.index, list(comms_sort.reset_index().index)))
     return Series(communities.values()).map(reorder_map)
+
+
+
+
+def json_to_network(json):
+    # Read nodes and make a dictionary of names
+    name_from_id = dict()
+    for node in json["elements"]["nodes"]:
+        name_from_id[node['data']['id']] = node['data']['name']
+
+    #Create network
+    graph = Graph()
+    
+    #Add nodes
+    for n in set(name_from_id.values()):
+        graph.add_node(n)
+
+    #Add edges
+    for edge in json["elements"]["edges"]:
+        source_id = edge['data']['source']
+        source_name = name_from_id[source_id]
+        target_id  = edge['data']['target']
+        target_name = name_from_id[target_id]
+        #Add edge weight
+        weight = edge['data']["weight"]
+        if weight > 0:
+            graph.add_weighted_edges_from([(source_name, target_name, weight)])
+        
+    return(graph)

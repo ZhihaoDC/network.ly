@@ -1,30 +1,32 @@
 from flask import jsonify, request, Blueprint
-import src.api.preprocess as preprocess 
+import src.api.__network_formatter__ as nw_formatter
+from src.api.__input_manager__ import InputManager
 import hashlib
 import json
 
 
 GraphVisualizationController = Blueprint('GraphVisualizationController', __name__)
 
-@GraphVisualizationController.route('/community-detection/graph-visualization', methods=['POST'])
+@GraphVisualizationController.route('/graph-visualization', methods=['POST'])
 def visualize_network():
     try:
-        file = request.files['file']
-        if (len(request.files) > 1) and ('columns' in request.files):
-            columns = request.files['columns'].read().decode('utf8').replace("'",'"')
-            columns_json= json.loads(columns)
-        else:
-            columns_json= None
+        input = InputManager(request.files)
+        file, file_name, file_hash, columns = input.file, input.file_name, input.file_hash, input.csv_columns       
 
-        graph = preprocess.file_to_network(file, columns_json)
+        graph = nw_formatter.file_to_network(file, columns)
+        graph_json = nw_formatter.network_to_json(graph)
 
-        graph_json = preprocess.network_to_json(graph)
+        default_visualization_params = {'nodeSeparation': 500, 'communitySeparation': 800, 'gravity': 0.1}
 
-        #Generate dataset hash identifier  
-        md5_hash = hashlib.md5(file.read()).hexdigest() 
-
-        return jsonify({'network_json': graph_json, 
-                        'category':'network-visualization', 
-                        'dataset_hash': md5_hash}), 200
+        return jsonify({
+                        'experiment_name': file_name, #default value
+                        'network_json': graph_json,
+                        'communities': None,
+                        'metrics' : None,
+                        'visualization_params': default_visualization_params,
+                        'category': 'graph-visualization',
+                        'dataset_name': file_name,
+                        'dataset_id': file_hash
+                    }), 200
     except:
         return jsonify({"errorMessage": "Invalid .csv format"}), 400

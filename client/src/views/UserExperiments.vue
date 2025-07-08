@@ -16,7 +16,7 @@
 import Experiments from "@/components/Experiments.vue";
 export default{
     name: "UserExperiments",
-    components: {Experiments},
+    components: {Experiments}
 }
 </script>
 

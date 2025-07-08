@@ -1,32 +1,53 @@
 <template>
 
-  <b-container id="container">
+  <b-container id="container" class="d-flex flex-column py-1 px-3">
 
-    <b-form-group>
-      <h4 v-if="!editing" @click="startEditing" title="Nombre del experimento"> {{experiment_name}} 
-        <b-icon id="edit-icon" icon="pencil-fill"></b-icon>
-      </h4>
+    <h4 id="header" v-if='isCommunityDetection'> <b> Experimento detección de comunidades ({{ experiment.category }}) </b></h4> 
+      <h4 id="header" v-else> <b> Visualización </b></h4>
 
-      <b-form-input v-else id="experiment_name" 
-      ref="experiment_name_input" 
-      class="custom-input" 
-      v-model="experiment.experiment_name"
-      @keyup.enter="stopEditing"
-      @blur="stopEditing" 
-      @focus="moveCursorToLeft"
-      :placeholder="experiment_name">
-      </b-form-input>
-  </b-form-group>
+    <b-form>
+      <b-form-group class="mt-3">
+        <h4 v-if="!editing" @click="startEditing" title="Nombre del experimento"> {{experiment_name}} 
+          <b-icon id="edit-icon" icon="pencil-fill"></b-icon>
+        </h4>
 
-    <b-form-group id="input-description" label="Descripción" label-for="input-description">
-      <b-form-textarea id="description" v-model="experiment.description"
-        placeholder="Introduce una descripción para el experimento"></b-form-textarea>
-    </b-form-group>
+        <b-form-input v-else id="experiment_name" 
+        ref="experiment_name_input" 
+        class="custom-input" 
+        v-model="experiment.experiment_name"
+        @keyup.enter="stopEditing"
+        @blur="stopEditing" 
+        @focus="moveCursorToLeft"
+        :placeholder="experiment_name">
+        </b-form-input>
+      </b-form-group>
 
-    <b-button type="submit" :disabled="!activateSubmitButton" @click="handleSubmitNetwork" variant="primary"
-      class="content-item submit-button">
-      {{this.submitted_msg}}
-    </b-button>
+      <b-form-group id="input-description" label="Descripción" label-for="input-description">
+        <b-form-textarea id="description" v-model="experiment.description" @change="updateDescription"
+          placeholder="Introduce una descripción para el experimento"></b-form-textarea>
+      </b-form-group>
+
+
+      <PlotVisualizationParameters @updateVisualizationParameters="updateVisualizationParameters" :isCommunityDetection="isCommunityDetection"></PlotVisualizationParameters>
+
+
+      <b-form-group v-if='isCommunityDetection' id="input-communityColor" class="mb-3" >
+        <label id="colorPickerLabel" for="colorPicker">Color de la comunidad</label>
+        <b-form-input id="colorPicker" type="color" v-model="communityColor" @input="changeCommunityColor()" @blur="updateEdgesColor()"></b-form-input>
+      </b-form-group>       
+
+    </b-form>
+    <div id="submit-experiment">
+      <b-button id="submit-experiment" block size="lg" type="submit" :disabled="!(activateSubmitButton && isAuthenticated)" @click="handleSubmitNetwork" variant="primary"
+        class="content-item submit-button mt-auto" >
+        {{this.submitted_msg}}
+      </b-button>
+    </div>
+    <b-popover v-if=!isAuthenticated target="submit-experiment" triggers="hover" placement="right">
+      <template #title>¿Sabías que...?</template>
+      Si te <b> registras,</b> podrás guardar el resultado de tus experimentos. Además de poder guardar y gestionar tus datasets.
+      <b-link to="/user-signup"> Crea una cuenta aquí.</b-link>
+    </b-popover>
 
     <div id="success-alert">
       <b-alert :show="dismissCountDown" dismissible fade variant="success" @dismissed="dismissCountDown=0"
@@ -34,6 +55,7 @@
         ¡Experimento guardado! 
         <router-link to="/user-experiments" id="experiments-link">Ir a experimentos</router-link>
       </b-alert>
+
     </div>
     
   </b-container>
@@ -41,19 +63,22 @@
 </template>
 
 <script>
-import { store } from '../main'
+import PlotVisualizationParameters from "@/components/PlotVisualizationParameters.vue"
 
 export default {
   name: "PlotNetworkForm",
-  props: ['activateSubmitButton'],
+  components: {PlotVisualizationParameters},
+  props: ['activateSubmitButton', 'communityColor'],
   data: function () {
     return {
-      experiment: store.getLastComputedExperiment(),
-      experiment_name: store.getLastComputedExperiment().dataset_name,
+      experiment: this.$store.getters['experiment/getExperiment'],
+      experiment_name: this.$store.getters['experiment/getExperiment'].experiment_name,
+      user_id : 1,
       editing: false,
       dismissSecs: 4,
       dismissCountDown: 0,
       submitted_msg: "Guardar experimento",
+      visualizationParameters: this.$store.getters['experiment/getVisualizationParams']
     }
   },
   methods: {
@@ -69,17 +94,26 @@ export default {
       this.editing = false
       if ((this.experiment.experiment_name !== this.experiment.dataset_name) & (this.experiment.experiment_name !== "")){
         this.experiment_name = this.experiment.experiment_name
+        this.$store.commit('experiment/setExperimentName', this.experiment_name)
       }
     },  
     moveCursorToLeft() {
       const inputElement = this.$refs.experiment_name_input.$el;
-      inputElement.setSelectionRange(this.experiment.experiment_name.length, this.experiment.experiment_name.length);
+      inputElement.setSelectionRange(0, this.experiment.experiment_name.length);
     },
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown
     },
-    showAlert() {
+    updateDescription(){
+      this.$store.commit('experiment/setExperimentDescription', this.experiment.description)
+    },
+    showSuccessAlert() {
       this.dismissCountDown = this.dismissSecs
+    },
+    updateVisualizationParameters(newvisualizationParameters){
+        this.visualizationParameters = newvisualizationParameters
+        this.experiment.visualization_params = newvisualizationParameters
+        this.$emit('updateVisualizationParameters', newvisualizationParameters)
     },
     async handleSubmitNetwork(){
       // console.log("Mandando señal para actualizar experimento...")
@@ -107,8 +141,7 @@ export default {
           })
           .catch(err => {
             // An error occurred
-            console.log("Error: ")
-            console.log(err)
+            console.log(`Error: ${err}`)
           })
       }
       if (!this.confirmation && (this.experiment.experiment_id == null)) {
@@ -116,34 +149,33 @@ export default {
       }
     },
 
-    submit_experiment_to_backend() {
-      const axios = require("axios");
-      console.log(store.getLastComputedExperiment())
-      axios.post('http://localhost:5000/save-experiment',
-        JSON.stringify(store.getLastComputedExperiment()),
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        .then((response) => {
-          if (response.status === 200) {
-            this.submitted_msg = "Guardado!"
-            this.experiment = response.data.experiment
-            this.showAlert()
-          }
-        })
-        .catch((error) => {
-          console.log(error.response);
-          if (error.response.status == 500) {
-            this.error_msg = "Error en la comunicacion con el servidor";
-            this.submitted = false;
-          }
-        })
+    async submit_experiment_to_backend() {
+      this.experiment = this.$store.getters['experiment/getExperiment']
+      await this.$store.dispatch('experiment/saveExperiment')      
+      this.experiment = this.$store.getters['experiment/getExperiment']
+      // console.log("Saving experiment:")
+      // console.log(this.experiment)
+      this.submitted_msg = "Guardado!"
+      this.showSuccessAlert()
+    }, 
+
+    changeCommunityColor(){
+      this.$emit('changeCommunityColor', this.communityColor)
+    },
+    updateEdgesColor(){
+      this.$emit('updateEdgesColor')
     }
-
-
+  
   },
+  computed: {
+      isAuthenticated() {
+        return this.$store.getters['auth/isAuthenticated']
+      },
+      isCommunityDetection(){
+        return ["Louvain", "Girvan-Newman"].includes(this.experiment.category)
+      }
+
+    }
 }
 </script>
 

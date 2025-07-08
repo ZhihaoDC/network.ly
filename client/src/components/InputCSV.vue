@@ -1,23 +1,18 @@
 <template>
   <div id="content-item">
     <label
+      id="file-upload-label"
       for="file-upload"
       class="upload-button"
       v-bind:class="{ file_selected: file }"
-      v-b-popover.hover.right="
-        'El contenido debe de ser una lista de enlaces (de la siguiente forma):‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ' +
-        '╔════════╤═══════╤══════╗\n' +
-        '║‎ ‎ ‎ ‎ ‎ ‎ ‎ from ‎ ‎ ‎ ‎ ‎ │‎ ‎ ‎ ‎ ‎ ‎ ‎ to ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎│ ‎ ‎ weight ‎ ║\n' +
-        '╠════════╪═══════╪══════╣\n' +
-        '║‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎  ‎‎ ‎foo‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‎‎│‏‏‎ ‏‏‎ ‎‏‏‎‏‏‎ ‎‏‏‎ ‎ ‎‎‏‏‎ ‎bar‏‏‎ ‎‏‏‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎ ‎‏‏‎ ‎‎│‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎4‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‎║\n' +
-        '╟────────┼───────┼──────╢\n' +
-        '║‏‏‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎  ‎ ‎‎‏‏‎bar‏‏‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎│‏‏‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎ ‎‎cat‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎│‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎‏‏‎ ‎ ‎‏‏‎ ‎3‏‏‎ ‎‏‏‎ ‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‎║\n' +
-        '╟────────┼───────┼──────╢\n' +
-        '║‏‏‎ ‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎  ‎ ‎‎‎‎cat‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎‎‎│‏‏‎ ‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎dog‏‏‎ ‎‏‏‎ ‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎‎‎│‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎1‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‏‏‎ ‎‎‏‏‎║\n' +
-        '╚════════╧═══════╧══════╝'
-      "
-      title="Formato del csv"
+      
     >
+    <!-- v-b-popover.hover.right="'El contenido debe de ser una lista de enlaces (de la siguiente forma):\n' + 
+        '\nColumna 1: Nodo origen del enlace' +
+        '\nColumna 2: Nodo destino del enlace' +
+        '\nColumna 3: Peso del enlace'"
+      title="Formato del csv" -->
+    
       <span>
         {{
           file
@@ -27,6 +22,7 @@
         <small>{{ file ? "(" + bytesToSize(file.size) + ")" : "" }}</small>
       </span>
     </label>
+
     <b-form-file
       id="file-upload"
       plain
@@ -37,9 +33,20 @@
       @input="check_file()"
       ref="file_input"
     ></b-form-file>
+
+    <b-popover target="file-upload-label" triggers="hover" placement="bottom">
+      <template #title>Formato de input</template>
+      El input deberá ser una <b>lista de enlaces</b> en formato <b>.csv</b> conteniendo: 
+      <ul>
+        <li> <b>Columna 1:</b> Nodo origen del enlace.</li>
+        <li> <b>Columna 2:</b> Nodo destino del enlace. </li>
+        <li> <b>Columna 3:</b> Peso del enlace. </li>
+      </ul>
+    </b-popover>
     <br />
+
     <small>
-      Pon el cursor encima del botón anterior para ver el formato del .csv
+      Pon el cursor encima del botón para ver el formato del .csv
     </small>
     <br />
 
@@ -124,10 +131,21 @@
       class="w-25 content-item submit-button"
       v-bind:disabled="!(file && !error)"
       value="Visualizar"
-      v-on:click="check_manually_selected_columns_and_submit(file)"
-      v-if="!submitted"
+      v-on:click="validate_and_submit()"
+      v-if="!submitted && isExperiment"
     >
-      Visualizar
+    Visualizar 
+    </b-button>
+    <b-button
+      type="submit"
+      variant="primary"
+      class="w-25 content-item submit-button"
+      v-bind:disabled="!(file && !error)"
+      value="Visualizar"
+      v-on:click="validate_and_submit()"
+      v-if="!submitted && (!isExperiment)"
+    >
+    Subir 
     </b-button>
     <b-spinner
       v-if="submitted"
@@ -137,13 +155,16 @@
       class="m-5"
     ></b-spinner>
   </div>
+  
+
 </template>
 
 <script>
-import { store } from "../main.js";
+
+import {EventBus} from '../main'
 export default {
   name: "InputCSV",
-  props: ["selectedMethod"],
+  props: ["selectedMethod", "action", "successUrl"],
   data() {
     return {
       file: null,
@@ -154,47 +175,106 @@ export default {
       target: null,
       weight: null,
       currently_selected_columns: {
-        'source':null,
-        'target':null,
-        'weight':null
+        'source': null,
+        'target': null,
+        'weight': null
       },
       error: "",
       submitted: false,
     };
   },
   methods: {
+
     check_file() {
-      //Update error
+      //Reset variables
       this.error = "";
       this.columns = [];
-      if (this.file) {
-        //check format
-        if ((this.file["type"] != "text/csv") && (this.file["type"] != 'application/vnd.ms-excel')) {
-          this.error = "El archivo debe tener extensión .csv";
-        } else if ((this.file["type"] === "text/csv") | (this.file["type"] === 'application/vnd.ms-excel')) {
-          const reader = new FileReader();
-          reader.readAsText(this.file);
-          let self = this; //save reference
-          reader.onload = (e) => {
-            e.target.result.split("\n")[0]
-              .split(",")
-              .forEach(function (column) {
-                var column_text = column.toString().replaceAll('"','').replaceAll("'", "")
-                self.columns.push({
-                  text: column_text,
-                  value: column_text,
-                  disabled: false,
-                });
-              });
-              //check number of columns read
-              if (this.columns.length < 2){
-                this.error = "Formato erróneo. Por favor, introduce un csv con al menos 3 columnas."
-              }
-              console.log(this.columns)
-          };
-        }
-      }
+      let self = this
+
+      const accepted_file_types = ["text/csv", "application/vnd.ms-excel"]
+
+      if (!accepted_file_types.includes(this.file["type"]))
+        this.error = "El archivo debe tener extensión .csv";
+      else {
+        this.read_file(this.file)
+          .then(result => {
+            let first_line = result.split("\n")[0]
+            let headers = first_line.split(",")
+
+            headers.forEach(header =>{
+              let column = header.toString().replaceAll('"','').replaceAll("'", "")
+              self.columns.push({text: column, value: column, disabled: false})})
+
+            if (self.columns.length < 2)
+              self.error = "Formato erróneo. Por favor, introduce un csv con al menos 3 columnas." 
+          })
+          .catch( () => {self.error = "Error desconocido"})
+      } 
     },
+
+    read_file(file){
+      return new Promise((resolve, reject) => {
+        var reader = new FileReader()
+        reader.readAsText(file)
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = () => reject
+      })
+    },
+
+    
+    validate_and_submit(){
+      if (this.manually_select_columns && this.manual_columns_error)
+        this.error = this.manual_columns_error
+      else
+        this.submit_file()
+    },
+
+    async submit_file(){
+      var formData = new FormData()
+      formData.append("file", this.file)
+
+      if (this.manually_select_columns){
+        formData.append("columns", new Blob([this.currently_selected_columns], {type: 'application/json'}));
+      }
+      this.submitted = true
+      await this.$store.dispatch(this.action, {method: this.method, formData: formData})
+      this.$router.push(this.successUrl);
+    },
+
+    // check_manually_selected_columns_and_submit(file){
+    //   if (this.manually_select_columns){
+    //     if ((this.source === null) || (this.target === null) || (this.weight === null)){
+    //       this.error = "Por favor, rellena todos los valores correspondientes a nodo origen, destino y peso de arista"
+    //     } else {
+    //       this.error = ''
+    //     }
+    //   }
+    //   if (!this.error){
+    //     this.submit_file(file)
+    //   }
+    // },
+
+    // format_columns(){
+    //   return JSON.stringify({"source": this.source,
+    //                           "target": this.target,
+    //                           "weight": this.weight})
+    // },
+
+    // async submit_file() {
+    //   this.submitted = true;
+    //   let formData = new FormData();
+    //   formData.append("file", this.file);
+    //   if (this.manually_select_columns){
+    //     var columns = this.format_columns()
+    //     const columns_blob = new Blob([columns], {type: 'application/json'});
+    //     formData.append("columns", columns_blob);
+    //   }
+
+    //   await this.$store.dispatch(this.action, {method: this.method, formData: formData})
+    
+    //   this.$router.push(this.successUrl);
+        
+    // },
 
     update_currently_selected_columns(element, clicked){
       //remove value from currently selected columns if value has already been chosen
@@ -210,64 +290,6 @@ export default {
       this.error = ''
     },
 
-    check_manually_selected_columns_and_submit(file){
-      if (this.manually_select_columns){
-        if ((this.source === null) || (this.target === null) || (this.weight === null)){
-              this.error = "Por favor, rellena todos los valores correspondientes a nodo origen, destino y peso de arista"
-            }
-        else{
-          this.error = ''
-        }
-      }
-      if (!this.error){
-        this.submit_file(file)
-      }
-    },
-
-    async submit_file() {
-      this.submitted = true;
-      const axios = require("axios");
-      let formData = new FormData();
-      formData.append("file", this.file);
-      if (this.manually_select_columns){
-        var columns = JSON.stringify({"source": this.source,
-                                    "target": this.target,
-                                    "weight": this.weight})
-        const columns_blob = new Blob([columns], {
-          type: 'application/json'
-        });
-        formData.append("columns", columns_blob);
-      }
-      await axios
-        .post(
-          "http://localhost:5000/community-detection/" + this.method,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        )
-        .then((response) => {
-          if (response.status === 200) {
-            store.setLastComputedExperiment(response.data);
-            store.setIsNewExperiment(true)
-            this.$router.push(
-              "/community-detection/" + this.method + "/experiment"
-            );
-          }
-        })
-        .catch((error) => {
-          console.log(error.response);
-          if (error.response.status == 500) {
-            this.error =
-              "Formato erróneo. Por favor, introduce un .csv con las columnas en orden: \n " +
-              "from, to, weight";
-            this.submitted = false;
-          }
-        });
-    },
-
     bytesToSize(bytes) {
       var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
       if (bytes == 0) return "0 Byte";
@@ -275,6 +297,32 @@ export default {
       return Math.round(bytes / Math.pow(1024, i), 2) + " " + sizes[i];
     },
   },
+  computed:{
+    manual_columns_error() {
+      const selected_cols = this.currently_selected_columns
+      const source = selected_cols.source
+      const target = selected_cols.target
+      const weight = selected_cols.weight
+
+      if (this.manually_select_columns && source && target && weight)
+        return ""
+      else{
+        return "Por favor, rellena todos los valores correspondientes o desactiva la selección manual."
+      }
+    },
+    isExperiment(){
+      return ["louvain", "girvan-newman"].includes(this.selectedMethod)
+    }
+  },
+  mounted(){
+    EventBus.$on('csvFormatError', () =>{      
+      this.submitted = false
+      this.errorMessage = "Ha ocurrido un error procesando el archivo csv. Por favor, cambia el formato."
+    })
+  },
+  beforeDestroy () {
+      EventBus.$off('failedSignUp')
+  }
 };
 </script>
 

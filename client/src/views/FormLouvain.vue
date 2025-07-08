@@ -7,7 +7,10 @@
         densidad de las interconexiones intra-comunidad e inter-comunidad.
       </h4>
       <div id="content">
-        <InputCSV selectedMethod="louvain"/>
+        <InputCSV selectedMethod="louvain" 
+          action="experiment/getExperimentWithDataset" 
+          successUrl="/community-detection/louvain/experiment"
+        />
       </div>
     </div>
   </b-container>
@@ -17,7 +20,7 @@
 import InputCSV from "@/components/InputCSV.vue";
 export default {
   components: { InputCSV },
-  name: "FormLouvain",
+  name: "FormLouvain"
 };
 </script>
 

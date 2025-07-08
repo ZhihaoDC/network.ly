@@ -1,5 +1,9 @@
+import hashlib
 from io import BytesIO
+from os.path import dirname, join, realpath
 
+from src.services import DatasetService
+from src.models.DatasetModel import Dataset
 
 def test_apply_girvan_newman(client):
     """
@@ -36,3 +40,38 @@ def test_apply_girvan_newman(client):
     assert "edges" in response["network_json"]["elements"]
     assert "communities" in response
     assert "modularity" in response["metrics"]
+
+
+
+def test_apply_girvan_newman_to_dataset(client, auth):
+    """
+        GIVEN user is authenticated
+        WHEN api receives GET request on route '/community-detection/girvan-newman/<dataset_id>'
+            AND dataset exists
+        THEN return louvain experiment
+    """
+    ENDPOINT = '/community-detection/girvan-newman'
+    user_mock, login_headers = auth
+
+    dir_path = dirname(dirname(realpath(__file__))) #parent directory
+    conf_path = join(dir_path, 'static', 'game-of-thrones-books', 'book4.csv')
+
+    with open(conf_path, mode='rb') as file:
+        response = client.post("/save-dataset",
+                           headers=login_headers,
+                           content_type="multipart/form-data",
+                           data=({'file': file}))
+    
+    #check if dataset is present in db
+    with open(conf_path, mode='rb') as file:
+        file_hash = hashlib.md5(file.read()).hexdigest()
+        dataset = DatasetService.get_by_id(Dataset, user_id=user_mock['id'], id=file_hash)
+
+    response = client.get(f'{ENDPOINT}/{dataset["id"]}',
+                          headers=login_headers)
+    response_json = response.get_json()
+
+    assert response.status_code == 200
+    assert response_json['category'] == 'Girvan-Newman'
+    assert 'network_json' in response_json.keys()
+    assert 'communities' in response_json.keys()

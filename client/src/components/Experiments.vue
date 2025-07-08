@@ -5,28 +5,32 @@
                 <b-card-group v-for="(experiments, idx) in makeRows" :key="idx" deck
                     class="align-items-center justify-content-center">
                     <b-card v-for="(experiment, index) in experiments" :key="index" class="mb-3" id="b-card"
-                        :title="experiment.experiment_name" :sub-title="experiment.category">
-                        <b-img fluid :src="'data:image/png;base64,' +  experiment.thumbnail"></b-img>
-                        <b-card-text> {{ experiment.description }} </b-card-text>
-
-                        <b-button type="submit" variant="primary" value="Visualizar" v-on:click="visualize(experiment)"
-                            v-if="!submitted">
+                        :title="experiment.experiment_name" :sub-title="experiment.category" :img-src="'data:image/png;base64,' +  experiment.thumbnail">
+                        <!-- <b-img fluid :src="'data:image/png;base64,' +  experiment.thumbnail"></b-img> -->
+                        <b-card-text v-if="experiment.description"> {{ experiment.description }} </b-card-text>
+                        <b-card-text v-else id="missing-description"> No hay descripción </b-card-text>
+                        
+                        <b-button v-if="!submitted" @click="visualize(experiment)"
+                        value="Visualizar" type="submit" variant="primary" class="mr-2">
                             Visualizar
                         </b-button>
                         <b-spinner v-else variant="primary" label="Spinning" id="spinner" class="m-5"></b-spinner>
+                        <b-button @click="delete_experiment(experiment)"
+                        value="Eliminar" variant="outline-danger">
+                            <!-- Eliminar -->
+                            <b-icon icon="trash" aria-hidden="true" scale="1.1" class="pt-1"></b-icon>
+                        </b-button>
+                
+
                         <template #footer>
                             <small class="text-muted">Creado el {{parseDate(experiment.creation_date)}}</small>
                         </template>
-                        <div>
-                            <b-link id="delete-button" @click="delete_experiment(experiment)">
-                                Eliminar
-                            </b-link>
-                        </div>
+
                     </b-card>
                 </b-card-group>
             </div>
             <div v-else id="empty-experiments-container">
-                <img id="empty-experiments-img" src="../assets/test-tube.png"> 
+                <b-img id="empty-experiments-img" src="../assets/static/test-tube2.png" alt="No hay experiments" :width="200" :height="200"/> 
                 <div> No hay experimentos todavía </div>
             </div>
         </div>
@@ -34,8 +38,8 @@
 </template>
 
 <script>
-import axios from 'axios';
-import { store } from "../main.js";
+import {fetchExperimentsFromDB, deleteExperimentFromDB} from '@/api'
+
 export default {
     name: "Experiments",
     data: function () {
@@ -49,11 +53,6 @@ export default {
         };
     },
     computed: {
-        axiosParams() {
-            const params = new URLSearchParams();
-            params.append('user_id', '1');
-            return params;
-        },
 
         makeRows() {
             let row = [];
@@ -69,29 +68,17 @@ export default {
 
     methods: {
         getExperiments() {
-            const url = 'http://localhost:5000/get-experiments/' + this.user_id
-            axios.get(url)
+            fetchExperimentsFromDB(this.$store.getters['auth/jwtToken'])
                 .then((response) => {
                     this.experiments = response.data.experiments
                     this.n_experiments = this.experiments.length
                     let n_rows = this.n_experiments / this.number_experiment_columns
                     this.number_experiment_rows = Math.floor(n_rows) + 1
-
                     this.isFetching = false
-                    console.log(this.experiments)
                 })
                 .catch((error) => {
                     console.error(error)
                 })
-
-        },
-
-
-        getTitle(experiment_name, dataset_name) {
-            if (experiment_name)
-                return experiment_name
-            else
-                return dataset_name
 
         },
 
@@ -104,11 +91,9 @@ export default {
 
         visualize(experiment) {
             this.submitted = true
-            store.setLastComputedExperiment(experiment);
-            store.setIsNewExperiment(false);
-            this.$router.push(
-                "/community-detection/" + experiment.category.toLowerCase() + "/experiment"
-            );
+            this.$store.commit('experiment/setExperiment', experiment);
+            this.$store.commit('experiment/setIsNewExperiment', false);
+            this.$router.push(`/community-detection/${experiment.category.toLowerCase()}/experiment`);
         },
 
         delete_experiment(experiment) {
@@ -125,19 +110,14 @@ export default {
             })
                 .then(action => {
                     if (action) {
-                        const axios = require('axios')
                         const id_to_remove = experiment.experiment_id
-                        const url = 'http://localhost:5000/delete-experiment/' + String(this.user_id) + '/' + String(id_to_remove)
-                        console.log(url)
-                        axios.delete(url)
+                        deleteExperimentFromDB(id_to_remove, this.$store.getters['auth/jwtToken'])
                             .then(response => {
                                 if (response.status === 200) {
                                     console.log(response)
-                                    this.experiments = this.experiments.filter(function (experiment) {
-                                        return experiment.experiment_id != id_to_remove;
-                                    });
+                                    this.experiments = this.experiments.filter((experiment) => {
+                                        return experiment.experiment_id != id_to_remove});
                                 }
-
                             })
                             .catch(error => {
                                 console.log(error)
@@ -162,19 +142,26 @@ export default {
 <style scoped lang="scss">
 #b-card {
     box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
-    min-height: 25rem;
-    max-width: 25rem;
+    max-width: 20rem;
 };
 
-#delete-button {
-    color: gray;
-    font-size: 0.8rem;
-    text-decoration: underline;
-};
+@media screen and (min-width: 20em) {
+  .card-img,
+  .card-img-top,
+  .card-img-bottom {
+    min-height: 15em !important;
+    padding: 0.5em
+  }
+}
+// #delete-button {
+//     color: gray;
+//     font-size: 0.8rem;
+//     text-decoration: underline;
+// };
 
-#delete-button:hover {
-    color: crimson
-};
+// #delete-button:hover {
+//     color: crimson
+// };
 
 #empty-experiments-container{
     padding:2em;
@@ -183,4 +170,10 @@ export default {
     vertical-align: middle;
     padding: 1.25em;
 }
+#missing-description{
+    color: gray;
+    font-style: italic;
+    font-size: small
+}
+
 </style>
